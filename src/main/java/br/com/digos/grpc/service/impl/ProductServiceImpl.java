@@ -3,6 +3,7 @@ package br.com.digos.grpc.service.impl;
 import br.com.digos.grpc.domain.Product;
 import br.com.digos.grpc.dto.ProductInputDTO;
 import br.com.digos.grpc.dto.ProductOutputDTO;
+import br.com.digos.grpc.exception.ProductAlreadyExistsException;
 import br.com.digos.grpc.repository.ProductRepository;
 import br.com.digos.grpc.service.IProductService;
 import br.com.digos.grpc.util.ProductConverterUtil;
@@ -21,6 +22,7 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public ProductOutputDTO create(ProductInputDTO inputDTO) {
+        checkDuplicity(inputDTO.getName());
         Product product = ProductConverterUtil.productInputDTOToProduct(inputDTO);
         Product productCreated = this.productRepository.save(product);
         return ProductConverterUtil.productToProductOutputDTO(productCreated);
@@ -39,5 +41,13 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public List<ProductOutputDTO> findAll() {
         return null;
+    }
+
+    private void checkDuplicity(String name) {
+        this.productRepository.findByNameIgnoreCase(name)
+                .ifPresent(e ->
+                {
+                    throw new ProductAlreadyExistsException(name);
+                });
     }
 }
