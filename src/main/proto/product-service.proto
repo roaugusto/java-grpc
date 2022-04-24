@@ -8,7 +8,7 @@ package br.com.digos.grpc;
 service ProductService{
   rpc Create(ProductRequest) returns (ProductResponse);
   rpc FindById(RequestById) returns (ProductResponse);
-  rpc Delete(RequestById) returns (ProductResponse);
+  rpc Delete(RequestById) returns (EmptyResponse);
   rpc FindAkk(EmptyRequest) returns (ProductResponseList);
 }
 
@@ -17,6 +17,8 @@ message ProductResponseList {
 }
 
 message EmptyRequest {}
+
+message EmptyResponse {}
 
 message RequestById {
   int64 id = 1;

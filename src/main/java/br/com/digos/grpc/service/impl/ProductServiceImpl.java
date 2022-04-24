@@ -4,6 +4,7 @@ import br.com.digos.grpc.domain.Product;
 import br.com.digos.grpc.dto.ProductInputDTO;
 import br.com.digos.grpc.dto.ProductOutputDTO;
 import br.com.digos.grpc.exception.ProductAlreadyExistsException;
+import br.com.digos.grpc.exception.ProductNotFoundException;
 import br.com.digos.grpc.repository.ProductRepository;
 import br.com.digos.grpc.service.IProductService;
 import br.com.digos.grpc.util.ProductConverterUtil;
@@ -30,12 +31,17 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public ProductOutputDTO findById(Long id) {
-        return null;
+        Product product = this.productRepository.findById(id)
+                .orElseThrow(()-> new ProductNotFoundException(id));
+        return ProductConverterUtil.productToProductOutputDTO(product);
     }
 
     @Override
     public void delete(Long id) {
+        Product product = this.productRepository.findById(id)
+                .orElseThrow(()-> new ProductNotFoundException(id));
 
+        this.productRepository.delete(product);
     }
 
     @Override
