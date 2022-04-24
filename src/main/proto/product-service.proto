@@ -9,7 +9,7 @@ service ProductService{
   rpc Create(ProductRequest) returns (ProductResponse);
   rpc FindById(RequestById) returns (ProductResponse);
   rpc Delete(RequestById) returns (EmptyResponse);
-  rpc FindAkk(EmptyRequest) returns (ProductResponseList);
+  rpc FindAll(EmptyRequest) returns (ProductResponseList);
 }
 
 message ProductResponseList {
@@ -27,12 +27,12 @@ message RequestById {
 message ProductRequest{
   string name = 1;
   double price = 2;
-  int32 quantity_in_stack = 3;
+  int32 quantity_in_stock = 3;
 }
 
 message ProductResponse{
   int64 id = 1;
   string name = 2;
   double price = 3;
-  int32 quantity_in_stack = 4;
+  int32 quantity_in_stock = 4;
 }

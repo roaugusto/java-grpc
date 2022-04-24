@@ -1,10 +1,7 @@
 package br.com.digos.grpc.resources;
 
 
-import br.com.digos.grpc.ProductRequest;
-import br.com.digos.grpc.ProductResponse;
-import br.com.digos.grpc.ProductServiceGrpc;
-import br.com.digos.grpc.RequestById;
+import br.com.digos.grpc.*;
 import io.grpc.StatusRuntimeException;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.assertj.core.api.Assertions;
@@ -17,7 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.tuple;
 
 @SpringBootTest
 @TestPropertySource("classpath:application-test.properties")
@@ -43,11 +41,11 @@ public class ProductResourceIntegrationTest {
         ProductRequest productRequest = ProductRequest.newBuilder()
                 .setName("product name")
                 .setPrice(10.00)
-                .setQuantityInStack(100).build();
+                .setQuantityInStock(100).build();
 
         ProductResponse productResponse = serviceBlockingStub.create(productRequest);
 
-        Assertions.assertThat(productRequest)
+        assertThat(productRequest)
                 .usingRecursiveComparison()
                 .comparingOnlyFields("name", "price", "quantity_in_stock")
                 .isEqualTo(productResponse);
@@ -61,7 +59,7 @@ public class ProductResourceIntegrationTest {
         ProductRequest productRequest = ProductRequest.newBuilder()
                 .setName("Product A")
                 .setPrice(10.00)
-                .setQuantityInStack(100)
+                .setQuantityInStock(100)
                 .build();
 
         Assertions.assertThatExceptionOfType(StatusRuntimeException.class)
@@ -79,8 +77,8 @@ public class ProductResourceIntegrationTest {
 
         ProductResponse productResponse = serviceBlockingStub.findById(request);
 
-        Assertions.assertThat(productResponse.getId()).isEqualTo(request.getId());
-        Assertions.assertThat(productResponse.getName()).isEqualTo("Product A");
+        assertThat(productResponse.getId()).isEqualTo(request.getId());
+        assertThat(productResponse.getName()).isEqualTo("Product A");
 
     }
 
@@ -114,6 +112,25 @@ public class ProductResourceIntegrationTest {
         Assertions.assertThatExceptionOfType(StatusRuntimeException.class)
                 .isThrownBy(() -> serviceBlockingStub.delete(request))
                 .withMessage("NOT_FOUND: Produto com ID 4 não encontrado.");
+
+    }
+
+    @Test
+    @DisplayName("when findAll method is called, a list of products is returned")
+    public void findAllSuccessTest() {
+
+        EmptyRequest request = EmptyRequest.newBuilder().build();
+        ProductResponseList responseList = serviceBlockingStub.findAll(request);
+
+        assertThat(responseList).isInstanceOf(ProductResponseList.class);
+        assertThat(responseList.getProductsCount()).isEqualTo(2);
+
+        assertThat(responseList.getProductsList())
+                .extracting("id", "name", "price", "quantityInStock")
+                .contains(
+                        tuple(1L, "Product A", 10.99, 10),
+                        tuple(2L, "Product B", 10.99, 10)
+                );
 
     }
 
